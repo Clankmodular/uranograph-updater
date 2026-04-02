@@ -13,7 +13,62 @@
 
 <p id="status">Waiting...</p>
 
-<script type="module" src="app.js"></script>
+<script src="https://espressif.github.io/esptool-js/bundle.js"></script>
+
+<script>
+let device;
+let transport;
+let esploader;
+
+document.getElementById("connect").onclick = async () => {
+    try {
+        document.getElementById("status").innerText = "Select device...";
+
+        device = await navigator.serial.requestPort();
+
+        transport = new Transport(device);
+        await transport.connect();
+
+        esploader = new ESPLoader({
+            transport,
+            baudrate: 115200
+        });
+
+        await esploader.main();
+
+        document.getElementById("status").innerText = "Connected!";
+        document.getElementById("flash").disabled = false;
+
+    } catch (e) {
+        document.getElementById("status").innerText = "Connection failed";
+        console.error(e);
+    }
+};
+
+document.getElementById("flash").onclick = async () => {
+    try {
+        document.getElementById("status").innerText = "Flashing...";
+
+        const files = [
+            { data: await fetch("./firmware/bootloader.bin").then(r => r.arrayBuffer()), address: 0x1000 },
+            { data: await fetch("./firmware/partitions.bin").then(r => r.arrayBuffer()), address: 0x8000 },
+            { data: await fetch("./firmware/uranograph.bin").then(r => r.arrayBuffer()), address: 0x10000 }
+        ];
+
+        await esploader.writeFlash({
+            fileArray: files,
+            eraseAll: true,
+            compress: true
+        });
+
+        document.getElementById("status").innerText = "✅ Update complete";
+
+    } catch (e) {
+        document.getElementById("status").innerText = "❌ Flash failed";
+        console.error(e);
+    }
+};
+</script>
 
 </body>
 </html>
