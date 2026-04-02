@@ -26,8 +26,21 @@ document.getElementById("connect").onclick = async () => {
 
         device = await navigator.serial.requestPort();
 
-        transport = new Transport(device);
-        await transport.connect();
+transport = new Transport(device);
+await transport.connect();
+
+// 👇 AGGIUNGI QUESTO BLOCCO
+await transport.setDTR(false);
+await transport.setRTS(true);
+await new Promise(r => setTimeout(r, 100));
+await transport.setDTR(true);
+await transport.setRTS(false);
+
+// 👇 poi continua normalmente
+esploader = new ESPLoader({
+    transport,
+    baudrate: 115200
+});
 
         esploader = new ESPLoader({
             transport,
