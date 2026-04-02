@@ -1,5 +1,4 @@
-import { ESPLoader, Transport } from './esptool.js';
-
+import { ESPLoader, Transport } from 'https://unpkg.com/esptool-js@latest/dist/web/index.js';
 let device;
 let transport;
 let esploader;
