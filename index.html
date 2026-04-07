@@ -12,94 +12,25 @@ body {
     text-align: center;
     padding: 40px;
 }
-
-button {
-    background: #00e0ff;
-    color: black;
-    border: none;
-    padding: 15px 25px;
-    margin: 10px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-#status {
-    margin-top: 20px;
-    opacity: 0.8;
+iframe {
+    border-radius: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Uranograph Firmware Updater</h1>
+<h1>Uranograph Firmware Update</h1>
 
-<p>Connect your device and press update</p>
+<p>1. Click connect</p>
+<p>2. Select your device</p>
+<p>3. Upload firmware</p>
 
-<button id="connect">Connect</button>
-<button id="flash" disabled>Update Uranograph</button>
-
-<p id="status">Waiting...</p>
-
-<script src="https://espressif.github.io/esptool-js/bundle.js"></script>
-
-<script>
-let device;
-let transport;
-let esploader;
-
-const status = document.getElementById("status");
-
-document.getElementById("connect").onclick = async () => {
-    try {
-        status.innerText = "Select device...";
-
-        device = await navigator.serial.requestPort();
-
-        transport = new Transport(device);
-        await transport.connect();
-
-        esploader = new ESPLoader({
-            transport,
-            baudrate: 115200
-        });
-
-        await esploader.main();
-
-        status.innerText = "Connected!";
-        document.getElementById("flash").disabled = false;
-
-    } catch (e) {
-        status.innerText = "Connection failed";
-        console.error(e);
-    }
-};
-
-document.getElementById("flash").onclick = async () => {
-    try {
-        status.innerText = "Flashing firmware...";
-
-        const files = [
-            { data: await fetch("firmware/bootloader.bin").then(r => r.arrayBuffer()), address: 0x1000 },
-            { data: await fetch("firmware/partitions.bin").then(r => r.arrayBuffer()), address: 0x8000 },
-            { data: await fetch("firmware/uranograph.bin").then(r => r.arrayBuffer()), address: 0x10000 }
-        ];
-
-        await esploader.writeFlash({
-            fileArray: files,
-            eraseAll: true,
-            compress: true
-        });
-
-        status.innerText = "✅ Update complete";
-
-    } catch (e) {
-        status.innerText = "❌ Flash failed";
-        console.error(e);
-    }
-};
-</script>
+<iframe 
+  src="https://espressif.github.io/esptool-js/" 
+  width="100%" 
+  height="600px">
+</iframe>
 
 </body>
 </html>
